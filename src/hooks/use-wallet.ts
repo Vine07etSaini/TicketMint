@@ -12,12 +12,18 @@ type WalletState = {
 export function useWallet(): WalletState {
   const [isConnected, setIsConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    const storedAddress = localStorage.getItem('ticketmint-walletAddress');
-    if (storedAddress) {
-      setIsConnected(true);
-      setWalletAddress(storedAddress);
+    setIsClient(true);
+    try {
+      const storedAddress = localStorage.getItem('ticketmint-walletAddress');
+      if (storedAddress) {
+        setIsConnected(true);
+        setWalletAddress(storedAddress);
+      }
+    } catch (e) {
+      console.error('Failed to access localStorage', e);
     }
   }, []);
 
@@ -33,6 +39,15 @@ export function useWallet(): WalletState {
     setWalletAddress(null);
     setIsConnected(false);
   }, []);
+
+  if (!isClient) {
+    return {
+      isConnected: false,
+      walletAddress: null,
+      connectWallet,
+      disconnectWallet,
+    };
+  }
 
   return { isConnected, walletAddress, connectWallet, disconnectWallet };
 }
