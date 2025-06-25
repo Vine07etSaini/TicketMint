@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -6,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Ticket } from 'lucide-react';
 import type { Event } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
-import { useWallet } from '@/hooks/use-wallet';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 interface EventCardProps {
   event: Event;
@@ -14,16 +16,17 @@ interface EventCardProps {
 
 export function EventCard({ event }: EventCardProps) {
   const { toast } = useToast();
-  const { isConnected, connectWallet } = useWallet();
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
 
   const handleBuyTicket = () => {
-    if (!isConnected) {
+    if (!isAuthenticated) {
       toast({
-        title: 'Wallet Not Connected',
-        description: 'Please connect your wallet to purchase tickets.',
+        title: 'Authentication Required',
+        description: 'Please log in to purchase tickets.',
         variant: 'destructive',
       });
-      connectWallet();
+      router.push('/login');
       return;
     }
     toast({

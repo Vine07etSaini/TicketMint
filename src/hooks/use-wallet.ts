@@ -1,7 +1,9 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 
+// DEPRECATED: This hook is no longer in use. Please use useAuth from /src/hooks/use-auth.ts
 type WalletState = {
   isConnected: boolean;
   walletAddress: string | null;

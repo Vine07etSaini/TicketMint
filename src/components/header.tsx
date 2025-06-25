@@ -11,6 +11,7 @@ import {
   Ticket as TicketIcon,
   Lightbulb,
   Shield,
+  LogIn,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,44 +19,58 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { useWallet } from '@/hooks/use-wallet';
+import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 
 const navLinks = [
-  { href: '/', label: 'Events', icon: TicketIcon },
-  { href: '/my-tickets', label: 'My Tickets', icon: User },
-  { href: '/recommendations', label: 'For You', icon: Lightbulb },
-  { href: '/admin', label: 'Admin', icon: Shield },
+  { href: '/', label: 'Events', icon: TicketIcon, public: true },
+  { href: '/my-tickets', label: 'My Tickets', icon: User, public: false },
+  { href: '/recommendations', label: 'For You', icon: Lightbulb, public: false },
+  { href: '/admin', label: 'Admin', icon: Shield, public: false, adminOnly: true },
 ];
 
 export function Header() {
-  const { isConnected, walletAddress, connectWallet, disconnectWallet } = useWallet();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const pathname = usePathname();
 
-  const WalletButton = () => (
+  const filteredNavLinks = navLinks.filter(link => {
+    if (!isAuthenticated && (link.href === '/my-tickets' || link.href === '/recommendations')) return false;
+    if (link.adminOnly && !isAdmin) return false;
+    return true;
+  });
+
+  const AuthButton = () => (
     <>
-      {isConnected && walletAddress ? (
+      {isAuthenticated && user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="flex items-center gap-2">
               <Wallet className="h-4 w-4" />
-              <span className="truncate max-w-[100px]">{walletAddress}</span>
+              <span className="truncate max-w-[100px]">{user.address}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={disconnectWallet}>
+             <DropdownMenuLabel>
+                Logged in as {user.role}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={logout}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Disconnect</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       ) : (
-        <Button onClick={connectWallet}>
-          <Wallet className="mr-2 h-4 w-4" />
-          Connect Wallet
+        <Button asChild>
+            <Link href="/login">
+                <LogIn className="mr-2 h-4 w-4" />
+                Login
+            </Link>
         </Button>
       )}
     </>
@@ -70,7 +85,7 @@ export function Header() {
             <span className="hidden font-bold sm:inline-block">TicketMint</span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
-            {navLinks.map((link) => (
+            {filteredNavLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -100,7 +115,7 @@ export function Header() {
                 <span className="font-bold">TicketMint</span>
               </Link>
               <nav className="flex flex-col space-y-4">
-                {navLinks.map((link) => (
+                {filteredNavLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
@@ -121,7 +136,7 @@ export function Header() {
         </div>
 
         <div className="flex flex-1 items-center justify-end space-x-4">
-          <WalletButton />
+          <AuthButton />
         </div>
       </div>
     </header>

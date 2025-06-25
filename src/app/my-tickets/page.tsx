@@ -1,24 +1,36 @@
+
 'use client';
 
 import { TicketCard } from '@/components/ticket-card';
 import { Button } from '@/components/ui/button';
-import { useWallet } from '@/hooks/use-wallet';
+import { useAuth } from '@/hooks/use-auth';
 import { myTickets } from '@/lib/data';
-import { Wallet } from 'lucide-react';
+import { Loader2, LogIn } from 'lucide-react';
+import Link from 'next/link';
 
 export default function MyTicketsPage() {
-  const { isConnected, connectWallet } = useWallet();
+  const { isAuthenticated, isLoading } = useAuth();
 
-  if (!isConnected) {
+  if (isLoading) {
+    return (
+     <div className="container mx-auto flex h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4 text-center">
+       <Loader2 className="h-8 w-8 animate-spin" />
+     </div>
+   );
+ }
+
+  if (!isAuthenticated) {
     return (
       <div className="container mx-auto flex h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4 text-center">
-        <h2 className="text-2xl font-semibold">Connect Your Wallet</h2>
+        <h2 className="text-2xl font-semibold">Please Log In</h2>
         <p className="text-muted-foreground">
-          Please connect your wallet to view your NFT tickets.
+          You need to be logged in to view your NFT tickets.
         </p>
-        <Button onClick={connectWallet}>
-          <Wallet className="mr-2 h-4 w-4" />
-          Connect Wallet
+        <Button asChild>
+          <Link href="/login">
+            <LogIn className="mr-2 h-4 w-4" />
+            Log In
+          </Link>
         </Button>
       </div>
     );

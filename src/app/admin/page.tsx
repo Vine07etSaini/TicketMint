@@ -22,12 +22,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Edit, PlusCircle, Trash2 } from 'lucide-react';
+import { Edit, PlusCircle, Trash2, Loader2 } from 'lucide-react';
 import { events as initialEvents, type Event } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
 
 // Form schema for event creation/editing
 const eventFormSchema = z.object({
@@ -156,6 +158,8 @@ function CreateEventDialog({ onEventCreated, children }: { onEventCreated: (data
 export default function AdminPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const { toast } = useToast();
+  const { isLoading, isAuthenticated, isAdmin } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     // In a real app, you'd fetch this from your backend.
@@ -210,6 +214,32 @@ export default function AdminPage() {
       title: 'Action Required',
       description: `Editing for event ID ${eventId} is not implemented yet.`,
     });
+  }
+
+  if (isLoading) {
+    return (
+      <div className="container flex h-[calc(100vh-8rem)] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    router.replace('/login');
+    return (
+      <div className="container flex h-[calc(100vh-8rem)] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    router.replace('/access-denied');
+    return (
+      <div className="container flex h-[calc(100vh-8rem)] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   return (
