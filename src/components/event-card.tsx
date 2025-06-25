@@ -16,7 +16,7 @@ interface EventCardProps {
 
 export function EventCard({ event }: EventCardProps) {
   const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin } = useAuth();
   const router = useRouter();
 
   const handleBuyTicket = () => {
@@ -64,9 +64,11 @@ export function EventCard({ event }: EventCardProps) {
         </div>
       </CardContent>
       <CardFooter>
-        <Button className="w-full" onClick={handleBuyTicket}>
-          Buy Ticket
-        </Button>
+        {!isAdmin && (
+            <Button className="w-full" onClick={handleBuyTicket}>
+            Buy Ticket
+            </Button>
+        )}
       </CardFooter>
     </Card>
   );
