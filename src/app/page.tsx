@@ -20,7 +20,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   const plugin = useRef(
-    Autoplay({ delay: 2000, stopOnInteraction: true })
+    Autoplay({ delay: 2000, stopOnInteraction: false })
   );
 
   useEffect(() => {
@@ -55,8 +55,6 @@ export default function Home() {
             loop: true,
           }}
           className="w-full"
-          onMouseEnter={plugin.current.stop}
-          onMouseLeave={plugin.current.reset}
         >
           <CarouselContent>
             {mostSoldOutEvents.map((event) => (
