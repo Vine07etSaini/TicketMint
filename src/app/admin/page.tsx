@@ -4,9 +4,154 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Edit, PlusCircle, Trash2 } from 'lucide-react';
 import { events as initialEvents, type Event } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+// Form schema for event creation/editing
+const eventFormSchema = z.object({
+  name: z.string().min(3, { message: 'Name must be at least 3 characters.' }),
+  date: z.string().min(1, { message: 'Date is required.' }),
+  location: z.string().min(3, { message: 'Location is required.' }),
+  price: z.string().min(1, { message: 'Price is required.' }),
+  image: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+});
+
+type EventFormValues = z.infer<typeof eventFormSchema>;
+
+// Dialog component for creating a new event
+function CreateEventDialog({ onEventCreated, children }: { onEventCreated: (data: EventFormValues) => void; children: React.ReactNode }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<EventFormValues>({
+    resolver: zodResolver(eventFormSchema),
+    defaultValues: {
+      name: '',
+      date: '',
+      location: '',
+      price: '',
+      image: '',
+    },
+  });
+
+  const onSubmit = (data: EventFormValues) => {
+    onEventCreated(data);
+    form.reset();
+    setIsOpen(false);
+    toast({
+      title: 'Event Created',
+      description: 'The new event has been successfully created.',
+    });
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create New Event</DialogTitle>
+          <DialogDescription>
+            Fill in the details for your new event. Click save when you're done.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Event Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Cosmic Gate Tour" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Dec 15, 2024" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. The Warehouse, New York" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Price</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. 0.05 ETH" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image URL (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="https://placehold.co/600x400.png" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="submit">Create Event</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default function AdminPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -27,10 +172,33 @@ export default function AdminPage() {
         setEvents(initialEvents);
     }
   }, []);
+  
+  const persistEvents = (updatedEvents: Event[]) => {
+    setEvents(updatedEvents);
+    try {
+      localStorage.setItem('ticketmint-events', JSON.stringify(updatedEvents));
+    } catch (error) {
+      console.error("Failed to save events to local storage:", error);
+      toast({
+        title: "Save Error",
+        description: "Could not save event changes.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCreate = (data: EventFormValues) => {
+    const newEvent: Event = {
+      id: Date.now(),
+      ...data,
+      image: data.image || 'https://placehold.co/600x400.png',
+    };
+    persistEvents([...events, newEvent]);
+  };
 
   const handleDelete = (eventId: number) => {
-    // This is a placeholder. In a real app, this would be an API call.
-    setEvents(events.filter((event) => event.id !== eventId));
+    const updatedEvents = events.filter((event) => event.id !== eventId);
+    persistEvents(updatedEvents);
     toast({
       title: 'Event Deleted',
       description: `Event with ID ${eventId} has been removed.`,
@@ -43,22 +211,17 @@ export default function AdminPage() {
       description: `Editing for event ID ${eventId} is not implemented yet.`,
     });
   }
-  
-  const handleCreate = () => {
-    toast({
-      title: 'Action Required',
-      description: 'Creating a new event is not implemented yet.',
-    });
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-4xl font-bold tracking-tight font-headline">Manage Events</h1>
-        <Button onClick={handleCreate}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Create Event
-        </Button>
+        <CreateEventDialog onEventCreated={handleCreate}>
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Create Event
+          </Button>
+        </CreateEventDialog>
       </div>
 
       <div className="rounded-lg border shadow-sm bg-card">
