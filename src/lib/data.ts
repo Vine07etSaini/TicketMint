@@ -78,6 +78,49 @@ export const events: Event[] = [
   },
 ];
 
+export const mostSoldOutEvents: Event[] = [
+  {
+    id: 2,
+    name: 'Techno Titans Festival',
+    date: 'Jan 20, 2025',
+    location: 'CyberPark, Berlin',
+    price: '0.10 ETH',
+    image: 'https://placehold.co/600x400.png',
+  },
+  {
+    id: 5,
+    name: 'Aurora Borealis Light Show',
+    date: 'Mar 18, 2025',
+    location: 'Arctic Dome, Iceland',
+    price: '0.15 ETH',
+    image: 'https://placehold.co/600x400.png',
+  },
+  {
+    id: 1,
+    name: 'Cosmic Gate: Interstellar Tour',
+    date: 'Dec 15, 2024',
+    location: 'The Warehouse, New York',
+    price: '0.05 ETH',
+    image: 'https://placehold.co/600x400.png',
+  },
+  {
+    id: 6,
+    name: 'Deep House Sunset Cruise',
+    date: 'Apr 2, 2025',
+    location: 'Ibiza Harbor',
+    price: '0.07 ETH',
+    image: 'https://placehold.co/600x400.png',
+  },
+   {
+    id: 3,
+    name: 'Solasta Music & Arts',
+    date: 'Feb 5, 2025',
+    location: 'The Oasis, Miami',
+    price: '0.08 ETH',
+    image: 'https://placehold.co/600x400.png',
+  },
+];
+
 export const myTickets: Ticket[] = [
   {
     id: 101,

@@ -1,9 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { EventCard } from '@/components/event-card';
-import { events as initialEvents, type Event } from '@/lib/data';
+import { events as initialEvents, mostSoldOutEvents, type Event } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -32,6 +41,43 @@ export default function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <div className="mb-12">
+        <h2 className="text-3xl font-bold tracking-tight text-center mb-8 font-headline">Most Popular Events</h2>
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          className="w-full max-w-5xl mx-auto"
+        >
+          <CarouselContent>
+            {mostSoldOutEvents.map((event) => (
+              <CarouselItem key={event.id} className="md:basis-1/2 lg:basis-1/3">
+                <div className="p-1">
+                  <Card className="overflow-hidden rounded-lg shadow-md transition-all hover:shadow-xl hover:-translate-y-1">
+                    <CardContent className="flex aspect-video items-center justify-center p-0 relative">
+                      <Image
+                          src={event.image}
+                          alt={event.name}
+                          fill
+                          className="object-cover"
+                          data-ai-hint="popular event"
+                        />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
+                          <h3 className="text-white font-bold text-lg leading-tight">{event.name}</h3>
+                          <p className="text-white/80 text-sm mt-1">{event.location}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="hidden sm:inline-flex" />
+          <CarouselNext className="hidden sm:inline-flex" />
+        </Carousel>
+      </div>
+
       <h1 className="mb-8 text-4xl font-bold tracking-tight text-center font-headline">Upcoming Events</h1>
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
