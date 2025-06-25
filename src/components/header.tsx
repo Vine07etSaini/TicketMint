@@ -31,7 +31,7 @@ const navLinks = [
   { href: '/', label: 'Events', icon: TicketIcon, public: true },
   { href: '/my-tickets', label: 'My Tickets', icon: User, public: false },
   { href: '/recommendations', label: 'For You', icon: Lightbulb, public: false },
-  { href: '/admin', label: 'Admin', icon: Shield, public: false, adminOnly: true },
+  { href: '/admin', label: 'Dashboard', icon: Shield, public: false, adminOnly: true },
 ];
 
 export function Header() {
