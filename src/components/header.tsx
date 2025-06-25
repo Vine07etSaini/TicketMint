@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -9,6 +10,7 @@ import {
   User,
   Ticket as TicketIcon,
   Lightbulb,
+  Shield,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,7 +18,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useWallet } from '@/hooks/use-wallet';
@@ -27,6 +28,7 @@ const navLinks = [
   { href: '/', label: 'Events', icon: TicketIcon },
   { href: '/my-tickets', label: 'My Tickets', icon: User },
   { href: '/recommendations', label: 'For You', icon: Lightbulb },
+  { href: '/admin', label: 'Admin', icon: Shield },
 ];
 
 export function Header() {
