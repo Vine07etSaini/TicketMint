@@ -39,9 +39,17 @@ export function Header() {
   const pathname = usePathname();
 
   const filteredNavLinks = navLinks.filter(link => {
-    if (!isAuthenticated && (link.href === '/my-tickets' || link.href === '/recommendations')) return false;
-    if (link.adminOnly && !isAdmin) return false;
-    return true;
+    // Public links are visible to everyone
+    if (link.public) return true;
+
+    // From here, links are for authenticated users only
+    if (!isAuthenticated) return false;
+    
+    // Admin links are for admins only
+    if (link.adminOnly) return isAdmin;
+
+    // Regular authenticated user links are not for admins
+    return !isAdmin;
   });
 
   const AuthButton = () => (

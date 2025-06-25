@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -5,13 +6,19 @@ import { getEventRecommendations } from '@/ai/flows/event-recommendations';
 import { pastEventPurchases } from '@/lib/data';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Lightbulb, CheckCircle2 } from 'lucide-react';
+import { Loader2, Lightbulb, CheckCircle2, LogIn } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useAuth } from '@/hooks/use-auth';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function RecommendationsPage() {
   const [recommendations, setRecommendations] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { isAuthenticated, isLoading, isAdmin } = useAuth();
+  const router = useRouter();
 
   const handleGetRecommendations = async () => {
     setLoading(true);
@@ -27,6 +34,40 @@ export default function RecommendationsPage() {
       setLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+     <div className="container mx-auto flex h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4 text-center">
+       <Loader2 className="h-8 w-8 animate-spin" />
+     </div>
+   );
+  }
+
+  if (isAuthenticated && isAdmin) {
+    router.replace('/access-denied');
+    return (
+      <div className="container mx-auto flex h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4 text-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="container mx-auto flex h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4 text-center">
+        <h2 className="text-2xl font-semibold">Please Log In</h2>
+        <p className="text-muted-foreground">
+          You need to be logged in to get event recommendations.
+        </p>
+        <Button asChild>
+          <Link href="/login">
+            <LogIn className="mr-2 h-4 w-4" />
+            Log In
+          </Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

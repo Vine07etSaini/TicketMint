@@ -7,9 +7,11 @@ import { useAuth } from '@/hooks/use-auth';
 import { myTickets } from '@/lib/data';
 import { Loader2, LogIn } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function MyTicketsPage() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isAdmin } = useAuth();
+  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -17,7 +19,16 @@ export default function MyTicketsPage() {
        <Loader2 className="h-8 w-8 animate-spin" />
      </div>
    );
- }
+  }
+
+  if (isAuthenticated && isAdmin) {
+    router.replace('/access-denied');
+    return (
+      <div className="container mx-auto flex h-[calc(100vh-4rem)] flex-col items-center justify-center gap-4 text-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
