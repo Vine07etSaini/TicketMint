@@ -155,8 +155,126 @@ function CreateEventDialog({ onEventCreated, children }: { onEventCreated: (data
   );
 }
 
+// Dialog component for editing an existing event
+function EditEventDialog({
+  event,
+  onOpenChange,
+  onEventUpdated,
+}: {
+  event: Event | null;
+  onOpenChange: (open: boolean) => void;
+  onEventUpdated: (id: number, data: EventFormValues) => void;
+}) {
+  const { toast } = useToast();
+  const form = useForm<EventFormValues>({
+    resolver: zodResolver(eventFormSchema),
+  });
+
+  useEffect(() => {
+    if (event) {
+      form.reset(event);
+    }
+  }, [event, form]);
+
+  if (!event) return null;
+
+  const onSubmit = (data: EventFormValues) => {
+    onEventUpdated(event.id, data);
+    toast({
+      title: 'Event Updated',
+      description: 'The event has been successfully updated.',
+    });
+  };
+
+  return (
+    <Dialog open={!!event} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Edit Event</DialogTitle>
+          <DialogDescription>
+            Make changes to your event. Click save when you're done.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Event Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Price</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Image URL (Optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="submit">Save Changes</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export default function AdminPage() {
   const [events, setEvents] = useState<Event[]>([]);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const { toast } = useToast();
   const { isLoading, isAuthenticated, isAdmin } = useAuth();
   const router = useRouter();
@@ -200,6 +318,16 @@ export default function AdminPage() {
     persistEvents([...events, newEvent]);
   };
 
+  const handleUpdate = (eventId: number, data: EventFormValues) => {
+    const updatedEvents = events.map((event) =>
+      event.id === eventId
+        ? { ...event, ...data, image: data.image || 'https://placehold.co/600x400.png' }
+        : event
+    );
+    persistEvents(updatedEvents);
+    setEditingEvent(null);
+  };
+
   const handleDelete = (eventId: number) => {
     const updatedEvents = events.filter((event) => event.id !== eventId);
     persistEvents(updatedEvents);
@@ -209,11 +337,8 @@ export default function AdminPage() {
     });
   };
 
-  const handleEdit = (eventId: number) => {
-     toast({
-      title: 'Action Required',
-      description: `Editing for event ID ${eventId} is not implemented yet.`,
-    });
+  const handleEdit = (event: Event) => {
+     setEditingEvent(event);
   }
 
   if (isLoading) {
@@ -273,7 +398,7 @@ export default function AdminPage() {
                 <TableCell>{event.location}</TableCell>
                 <TableCell>{event.price}</TableCell>
                 <TableCell className="text-right">
-                  <Button variant="ghost" size="icon" onClick={() => handleEdit(event.id)}>
+                  <Button variant="ghost" size="icon" onClick={() => handleEdit(event)}>
                     <Edit className="h-4 w-4" />
                     <span className="sr-only">Edit</span>
                   </Button>
@@ -287,6 +412,17 @@ export default function AdminPage() {
           </TableBody>
         </Table>
       </div>
+       <EditEventDialog
+        event={editingEvent}
+        onEventUpdated={handleUpdate}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingEvent(null);
+          }
+        }}
+      />
     </div>
   );
 }
+
+    
